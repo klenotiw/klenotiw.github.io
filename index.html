@@ -275,6 +275,9 @@
                 }
               };
 
+              //start port
+              port.start();
+
               // Handle port errors
               if (port.onerror) {
                 port.onerror = function(error) {
