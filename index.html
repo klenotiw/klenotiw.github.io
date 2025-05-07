@@ -280,6 +280,7 @@
 
               // Handle port errors
               if (port.onerror) {
+                console.log("port error", port);
                 port.onerror = function(error) {
                   messageListenerResult.innerHTML += '<span style="color: red">✗ Port error: ' + error.message + '</span><br>';
                   addMessageToChatHistory('Port error: ' + error.message, false);
