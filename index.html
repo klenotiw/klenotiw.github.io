@@ -1,0 +1,419 @@
+<!DOCTYPE html><html><head><script src="https://cdn.shopify.com/shopifycloud/checkout-web/assets/app-bridge-checkout.js"></script><style>
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+  * {
+    margin: 0;
+  }
+  html, body {
+    height: 100%;
+  }
+  body {
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  img, picture, video, canvas, svg {
+    display: block;
+    max-width: 100%;
+  }
+  input, button, textarea, select {
+    font: inherit;
+  }
+  p, h1, h2, h3, h4, h5, h6 {
+    overflow-wrap: break-word;
+  }
+  #root, #__next {
+    isolation: isolate;
+  }
+</style><meta charSet="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Chat App Test</title><style>
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+  * {
+    margin: 0;
+  }
+  html, body {
+    height: 100%;
+  }
+  body {
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  img, picture, video, canvas, svg {
+    display: block;
+    max-width: 100%;
+  }
+  input, button, textarea, select {
+    font: inherit;
+  }
+  p, h1, h2, h3, h4, h5, h6 {
+    overflow-wrap: break-word;
+  }
+  #root, #__next {
+    isolation: isolate;
+  }
+</style></head><body><div><div id="chat-panel" style="position:fixed;bottom:70px;right:5px;width:375px;height:300px;background-color:white;border-radius:12px;box-shadow:0 6px 24px rgba(0, 0, 0, 0.2);z-index:9998;border:1px solid #e0e0e0;display:none;flex-direction:column;overflow:hidden"><div id="chat-header" style="padding:10px;background-color:#f9f9f9;border-bottom:1px solid #e0e0e0;display:flex;justify-content:space-between;align-items:center"><div style="display:flex;align-items:center;gap:12px"><h2 style="margin:0;font-size:16px">Chat</h2><select id="view-selector" style="padding:4px 8px;border-radius:4px;border:1px solid #c4cdd5;font-size:14px;cursor:pointer"><option value="static">Static Properties</option><option value="postmessage">Simple PostMessage</option></select></div><button id="close-button" style="background:none;border:none;cursor:pointer;font-size:16px">✕</button></div><div id="chat-content" style="flex:1;padding:8px;overflow-y:auto;display:flex;flex-direction:column;gap:8px"><div id="static-view"><div style="display:flex;flex-direction:column;gap:4px;margin-bottom:8px"><button id="extension-handle-button" style="background-color:#008060;color:white;border:none;border-radius:4px;padding:6px 10px;cursor:pointer;font-weight:500;align-self:flex-start;font-size:12px">Show Extension Handle</button><button id="platform-button" style="background-color:#008060;color:white;border:none;border-radius:4px;padding:6px 10px;cursor:pointer;font-weight:500;align-self:flex-start;font-size:12px">Show Platform</button><button id="surface-button" style="background-color:#008060;color:white;border:none;border-radius:4px;padding:6px 10px;cursor:pointer;font-weight:500;align-self:flex-start;font-size:12px">Show Surface</button><button id="locale-button" style="background-color:#008060;color:white;border:none;border-radius:4px;padding:6px 10px;cursor:pointer;font-weight:500;align-self:flex-start;font-size:12px">Show Locale</button><button id="visitor-button" style="background-color:#008060;color:white;border:none;border-radius:4px;padding:6px 10px;cursor:pointer;font-weight:500;align-self:flex-start;font-size:12px">Show Visitor</button><button id="idtoken-button" style="background-color:#008060;color:white;border:none;border-radius:4px;padding:6px 10px;cursor:pointer;font-weight:500;align-self:flex-start;font-size:12px">Show ID Token</button></div><div id="content-area" style="display:none"></div></div><div id="postmessage-view" style="display:none"><div style="padding:8px;background-color:#f5f5f5;border-radius:8px;display:flex;flex-direction:column;height:100%;position:relative;min-height:320px"><div style="padding:8px;text-align:center;border-bottom:1px solid #e0e0e0;margin-bottom:8px"><h3 style="margin:0;font-size:14px;font-weight:600">Chat</h3></div><div id="chat-history" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:4px 4px 60px 4px;min-height:200px"><div style="font-size:11px;text-align:center;color:#637381;margin:auto 0">Messages will appear here...</div></div><div id="chat-input-area" style="display:flex;padding:4px;border-top:1px solid #e0e0e0;background-color:white;border-radius:18px;position:absolute;bottom:8px;left:8px;right:8px;z-index:1000;box-shadow:0 -1px 5px rgba(0,0,0,0.05)"><div style="flex:1"></div><button id="send-ping-button" style="background-color:#008060;color:white;border:none;border-radius:18px;padding:6px 12px;cursor:pointer;font-weight:500;font-size:12px;margin-left:8px;display:flex;align-items:center;justify-content:center">Send Ping</button></div><div id="postmessage-result" style="display:none"></div><div id="message-listener-result" style="display:none"></div></div></div></div></div><div style="position:fixed;bottom:5px;right:5px;display:flex;align-items:center;justify-content:center;box-sizing:border-box;z-index:9999"><button id="chat-opener-button" style="background-color:#008060;color:white;border:none;border-radius:50px;padding:8px 16px;cursor:pointer;box-shadow:0 4px 12px rgba(0, 0, 0, 0.15);max-width:145px;width:fit-content;text-align:center"><h1 id="button-text" style="margin:0;font-size:14px;font-weight:600">Chat</h1></button></div><script>
+        // State management
+        let expanded = false;
+        let contentShown = false;
+
+        // DOM elements (using function for cleaner repetitive access)
+        const getEl = id => document.getElementById(id);
+        const chatPanel = getEl('chat-panel');
+        const chatButton = getEl('chat-opener-button');
+        const closeButton = getEl('close-button');
+        const buttonText = getEl('button-text');
+        const viewSelector = getEl('view-selector');
+        const staticView = getEl('static-view');
+        const postmessageView = getEl('postmessage-view');
+        const contentArea = getEl('content-area');
+        const sendPingButton = getEl('send-ping-button');
+        const postmessageResult = getEl('postmessage-result');
+        const messageListenerResult = getEl('message-listener-result');
+        const chatHistory = getEl('chat-history');
+
+        // Toggle function for chat panel
+        function toggleChat() {
+          expanded = !expanded;
+
+          if (expanded) {
+            chatPanel.style.display = 'flex';
+            buttonText.textContent = 'Close';
+            window.resizeTo(375, 400);
+          } else {
+            chatPanel.style.display = 'none';
+            buttonText.textContent = 'Chat';
+            window.resizeTo(700, 700);
+          }
+        }
+
+        // Helper function to create a formatted container for property display
+        function createPropertyDisplay(title, propertyPath, propertyValue) {
+          contentArea.style.display = 'block';
+          contentArea.innerHTML = '';
+
+          // Create heading
+          const heading = document.createElement('h3');
+          heading.textContent = title;
+          heading.style.margin = '0 0 8px 0';
+          heading.style.fontSize = '14px';
+          contentArea.appendChild(heading);
+
+          // Create element for property value
+          const valueContainer = document.createElement('div');
+          valueContainer.textContent = propertyValue;
+          valueContainer.style.padding = '8px';
+          valueContainer.style.backgroundColor = '#f4f6f8';
+          valueContainer.style.borderRadius = '4px';
+          valueContainer.style.marginBottom = '8px';
+          valueContainer.style.fontFamily = 'monospace';
+          valueContainer.style.wordBreak = 'break-all';
+          valueContainer.style.fontSize = '12px';
+          contentArea.appendChild(valueContainer);
+
+          // Add explanation
+          const explanation = document.createElement('p');
+          explanation.textContent = 'This value is retrieved from ' + propertyPath;
+          explanation.style.fontSize = '12px';
+          explanation.style.color = '#637381';
+          explanation.style.margin = '0 0 8px 0';
+          contentArea.appendChild(explanation);
+        }
+
+        // Generic function to display shopify properties
+        function showShopifyProperty(title, propertyPath, getter) {
+          contentShown = true;
+
+          try {
+            createPropertyDisplay(
+              title,
+              propertyPath,
+              getter() || title + " not found"
+            );
+          } catch (error) {
+            createPropertyDisplay(
+              title,
+              propertyPath,
+              'Error accessing ' + title.toLowerCase() + ': ' + error.message
+            );
+          }
+        }
+
+        // Generic function to display async shopify properties
+        async function showAsyncShopifyProperty(title, propertyPath, asyncGetter) {
+          contentShown = true;
+          contentArea.style.display = 'block';
+          contentArea.innerHTML = 'Loading ' + title.toLowerCase() + ' data...';
+
+          try {
+            if (typeof asyncGetter === 'function') {
+              createPropertyDisplay(
+                title,
+                propertyPath,
+                await asyncGetter() || 'No ' + title.toLowerCase() + ' found'
+              );
+            } else {
+              createPropertyDisplay(
+                title,
+                propertyPath,
+                title + ' function not found'
+              );
+            }
+          } catch (error) {
+            createPropertyDisplay(
+              title,
+              propertyPath,
+              'Error accessing ' + title.toLowerCase() + ': ' + error.message
+            );
+          }
+        }
+
+        // Function to switch between views
+        function switchView() {
+          if (viewSelector.value === 'static') {
+            staticView.style.display = 'block';
+            postmessageView.style.display = 'none';
+          } else if (viewSelector.value === 'postmessage') {
+            staticView.style.display = 'none';
+            postmessageView.style.display = 'block';
+            contentShown = false;
+            contentArea.style.display = 'none';
+
+            // Set up the message listener when postmessage view is selected
+            setupMessagePortListener();
+          }
+        }
+
+        // Helper function to add a message to the chat history
+        function addMessageToChatHistory(message, isOutgoing = false) {
+          try {
+            // Clear the initial placeholder if it's the first message
+            if (chatHistory.querySelector('div[style*="margin: auto"]')) {
+              chatHistory.innerHTML = '';
+            }
+
+            const timestamp = new Date().toLocaleTimeString();
+
+            // Format message if it's an object
+            const messageText = typeof message === 'object' 
+              ? (message.type === 'chat-message' && message.message)
+                ? message.message 
+                : JSON.stringify(message)
+              : message.toString();
+
+            // Create message container with bubble
+            const messageContainer = document.createElement('div');
+            messageContainer.style.display = 'flex';
+            messageContainer.style.justifyContent = isOutgoing ? 'flex-end' : 'flex-start';
+            messageContainer.style.marginBottom = '8px';
+            
+            // Add bubble with timestamp
+            const bubble = document.createElement('div');
+            bubble.style.maxWidth = '80%';
+            bubble.style.padding = '8px 12px';
+            bubble.style.borderRadius = isOutgoing ? '18px 18px 4px 18px' : '18px 18px 18px 4px';
+            bubble.style.backgroundColor = isOutgoing ? '#008060' : '#ffffff';
+            bubble.style.color = isOutgoing ? '#ffffff' : '#333333';
+            bubble.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.1)';
+            bubble.style.fontSize = '12px';
+            bubble.textContent = messageText;
+            
+            // Add timestamp inside bubble
+            const timeElement = document.createElement('div');
+            timeElement.textContent = timestamp;
+            timeElement.style.fontSize = '9px';
+            timeElement.style.color = isOutgoing ? 'rgba(255, 255, 255, 0.7)' : '#999';
+            timeElement.style.marginTop = '4px';
+            bubble.appendChild(timeElement);
+            
+            // Add bubble to container and container to chat history
+            messageContainer.appendChild(bubble);
+            chatHistory.appendChild(messageContainer);
+
+            // Scroll to bottom with a small delay to ensure layout is complete
+            setTimeout(function() { 
+              chatHistory.scrollTop = chatHistory.scrollHeight; 
+            }, 50);
+
+            // Also update the hidden result elements for consistency
+            if (isOutgoing) {
+              postmessageResult.innerHTML += '<div>' + messageText + ' [' + timestamp + ']</div>';
+            } else {
+              messageListenerResult.innerHTML += '<div>' + messageText + ' [' + timestamp + ']</div>';
+            }
+          } catch (error) {
+            console.error('Error adding message to chat history:', error);
+          }
+        }
+
+        // Function to setup message port listener
+        function setupMessagePortListener() {
+          try {
+            // Check if window.shopify.extension.port is available
+            if (window.shopify && window.shopify.extension && window.shopify.extension.port) {
+              const port = window.shopify.extension.port;
+
+              // Keep the original logging for debugging
+              messageListenerResult.innerHTML = 'Listening for messages on window.shopify.extension.port...<br>';
+
+              // Add event listener for messages
+              port.onmessage = function(event) {
+                try {
+                  const message = event.data;
+
+                  // Add message to chat history (non-outgoing)
+                  addMessageToChatHistory(message, false);
+                } catch (error) {
+                  // Error handling just in case
+                  messageListenerResult.innerHTML += '<span style="color: red">✗ Error: ' + error.message + '</span><br>';
+
+                  // Show error in chat as system message
+                  addMessageToChatHistory('Error receiving message: ' + error.message, false);
+                }
+              };
+
+              // Handle port errors
+              if (port.onerror) {
+                port.onerror = function(error) {
+                  messageListenerResult.innerHTML += '<span style="color: red">✗ Port error: ' + error.message + '</span><br>';
+                  addMessageToChatHistory('Port error: ' + error.message, false);
+                };
+              }
+            } else {
+              // Show error if port is not available
+              messageListenerResult.innerHTML = '<span style="color: red">✗ Error: window.shopify.extension.port is not available</span>';
+              addMessageToChatHistory('Error: Unable to connect to message port. extension.port is not available.', false);
+            }
+          } catch (error) {
+            messageListenerResult.innerHTML = '<span style="color: red">✗ Error setting up listener: ' + error.message + '</span>';
+          }
+        }
+
+        // Function to send ping message via postMessage
+        function sendPingMessage() {
+          try {
+            // Add to chat history as an outgoing message and send the message
+            const pingMessage = { type: 'chat-message', message: 'ping' };
+            addMessageToChatHistory(pingMessage, true);
+
+            // Log the attempt (for debugging in hidden element)
+            postmessageResult.innerHTML = 'Attempting to send message...<br>';
+
+            // Check if window.shopify.extension.port exists
+            if (window.shopify && window.shopify.extension && window.shopify.extension.port && typeof window.shopify.extension.port.postMessage === 'function') {
+              // Send the message
+              window.shopify.extension.port.postMessage(pingMessage);
+
+              // Update debug info
+              postmessageResult.innerHTML += '<span style="color: green">✓ Message sent</span><br>';
+            } else {
+              // Show error if postMessage is not available
+              postmessageResult.innerHTML += '<span style="color: red">✗ Error: window.shopify.extension.port.postMessage is not available</span>';
+              addMessageToChatHistory('Error: Unable to send message. extension.port is not available.', true);
+            }
+          } catch (error) {
+            // Show any errors in the chat and in the debug
+            postmessageResult.innerHTML += '<span style="color: red">✗ Error: ' + error.message + '</span>';
+            addMessageToChatHistory('Error sending message: ' + error.message, true);
+          }
+        }
+
+        // Event listeners for window object controls
+        chatButton.addEventListener('click', toggleChat);
+        closeButton.addEventListener('click', toggleChat);
+        viewSelector.addEventListener('change', switchView);
+        sendPingButton.addEventListener('click', sendPingMessage);
+
+        // Add event listeners for all property buttons
+        [
+          { 
+            id: 'extension-handle-button', 
+            handler: function() {
+              showShopifyProperty(
+                'Extension Handle',
+                'window.shopify.extension.handle',
+                function() { return window.shopify && window.shopify.extension ? window.shopify.extension.handle : undefined; }
+              );
+            }
+          },
+          { 
+            id: 'platform-button', 
+            handler: function() {
+              showShopifyProperty(
+                'Platform',
+                'window.shopify.platform',
+                function() { return window.shopify ? window.shopify.platform : undefined; }
+              );
+            }
+          },
+          { 
+            id: 'surface-button', 
+            handler: function() {
+              showShopifyProperty(
+                'Surface',
+                'window.shopify.surface',
+                function() { return window.shopify ? window.shopify.surface : undefined; }
+              );
+            }
+          },
+          { 
+            id: 'locale-button', 
+            handler: function() {
+              showShopifyProperty(
+                'Locale',
+                'window.shopify.config.locale',
+                function() { return window.shopify && window.shopify.config ? window.shopify.config.locale : undefined; }
+              );
+            }
+          },
+          { 
+            id: 'visitor-button', 
+            handler: function() {
+              showAsyncShopifyProperty(
+                'Visitor ID',
+                'window.shopify.visitor().id',
+                function() {
+                  return new Promise(function(resolve) {
+                    if (typeof window.shopify !== 'undefined' && typeof window.shopify.visitor === 'function') {
+                      window.shopify.visitor().then(function(visitor) {
+                        resolve(visitor ? visitor.id : null);
+                      }).catch(function() {
+                        resolve(null);
+                      });
+                    } else {
+                      resolve(null);
+                    }
+                  });
+                }
+              );
+            }
+          },
+          { 
+            id: 'idtoken-button', 
+            handler: function() {
+              showAsyncShopifyProperty(
+                'ID Token',
+                'window.shopify.idToken()',
+                function() {
+                  return new Promise(function(resolve) {
+                    if (typeof window.shopify !== 'undefined' && typeof window.shopify.idToken === 'function') {
+                      window.shopify.idToken().then(function(token) {
+                        resolve(token);
+                      }).catch(function() {
+                        resolve(null);
+                      });
+                    } else {
+                      resolve(null);
+                    }
+                  });
+                }
+              );
+            }
+          }
+        ].forEach(function(buttonConfig) {
+          var button = getEl(buttonConfig.id);
+          if (button) {
+            button.addEventListener('click', buttonConfig.handler);
+          }
+        });
+      </script></div></body></html>
